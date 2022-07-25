@@ -29,7 +29,7 @@ class CNN(nn.Module):
         self.maxpooling2 = nn.MaxPool2d(kernel_size=(2, 1))
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(3, 3))
         self.bactchN3 = nn.BatchNorm2d(128)
-        self.fc1 = nn.Linear(in_features=3072,out_features=128)
+        self.fc1 = nn.Linear(in_features=512,out_features=128)
         self.output = nn.Linear(in_features=128,out_features=classes)
 
 
@@ -49,6 +49,7 @@ class CNN(nn.Module):
         #relu3 = nn.ReLU()(conv3)
         relu3 = nn.ReLU()(batchN3)
         flatten = nn.Flatten()(relu3)
+
         dropout1 = nn.Dropout(0.5)(flatten)
         fc1 = self.fc1(dropout1)
         dropout2 = nn.Dropout(0.5)(fc1)

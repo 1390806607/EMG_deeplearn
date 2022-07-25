@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 input_channels = 1
 input_size = 400
 hidden_size = 256
-num_classes = 6
-batch_size = 16
+num_classes = 7
+batch_size = 8
 num_epochs = 200
 learning_rate = 0.0001   # 0.0001                # 学习率可以调参
 num_workers = 0
@@ -46,19 +46,20 @@ def loss_acc_plot(train_loss,train_acc,val_acc,val_loss):
 
 
 ##############  读取数据
-path = '../data/sEMG_for_Basic_Hand_movements/feautre_cache.h5'
+# path = '../data/sEMG_for_Basic_Hand_movements/feautre_cache.h5'
+path = '../data/mydataset/1_2.h5'
 save_dir = '../models'
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 train_data = EmgDataset(path,train=True)
 train_loader = DataLoader(train_data,batch_size=batch_size,shuffle=True)
 val_data = EmgDataset(path,train=False)
-val_loader = DataLoader(val_data,batch_size=12,shuffle=True)
+val_loader = DataLoader(val_data,batch_size=4,shuffle=True)
 
 # 创建模型实例化
 #model = DNN(input_size,num_classes)
-#model = CNN(input_channels,num_classes)
-model = MLCNN(input_channels,num_classes)
+model = CNN(input_channels,num_classes)
+# model = MLCNN(input_channels,num_classes)
 # 优化器
 #optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, weight_decay=1e-4)       # 优化器可以调 Adam   优化器里面的权重参数
 optimizer = optim.Adam(model.parameters(),lr=learning_rate, weight_decay=1e-4)

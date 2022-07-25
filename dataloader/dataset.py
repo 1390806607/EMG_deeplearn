@@ -27,9 +27,9 @@ class EmgDataset(Dataset):
 
 
 if __name__=='__main__':
-    path = '../data/sEMG_for_Basic_Hand_movements/feautre_cache.h5'
-    train_data = EmgDataset(path=path, train=False)
-    train_loader = DataLoader(train_data, batch_size=32, shuffle=True, num_workers=4)
+    path = '../data/mydataset/1_2.h5'
+    train_data = EmgDataset(path=path, train=True)
+    train_loader = DataLoader(train_data, batch_size=2, shuffle=False, num_workers=1)
     for index,sample in enumerate(train_loader):
         print(index)
         print(sample[0])

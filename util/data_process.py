@@ -36,12 +36,50 @@ def get_data(path):
             data.append(value)
             label.append([label_to_id[key[:-1]]]*value.shape[0])
     # data = np.array(data).reshape((-1,3000,2))
-    data = np.array(data).reshape(-1, 2, 30, 3000).transpose(0, 2, 3, 1).reshape(-1, 3000, 2)
-    label = np.max(np.array(label).reshape(-1, 2, 30).transpose(0, 2, 1).reshape(-1, 2), axis=1)
+    # data = np.array(data).reshape(-1, 2, 30, 3000).transpose(0, 2, 3, 1).reshape(-1, 3000, 2)
+    data = np.array(data).reshape(-1, 2, 1, 3000).transpose(0, 2, 3, 1).reshape(-1, 3000, 2)
+    # label = np.max(np.array(label).reshape(-1, 2, 30).transpose(0, 2, 1).reshape(-1, 2), axis=1)
+    label = np.max(np.array(label).reshape(-1, 2, 1).transpose(0, 2, 1).reshape(-1, 2), axis=1)
     # print(label_to_id)
     # print(data.shape)
     # print(label.shape)
     return data, label, label_to_id, id_to_label
+
+# 从txt中读取二通道文件
+def getdata_from_txt(path,label_path):
+    label2id = {}
+    id2label = {}
+    num = 0
+    data = np.array([[0,0]])
+    label = []
+    for name in os.listdir(path):
+        tmp = name.split('.')[0][:-1]
+        tmp_data = []
+        if tmp not in label2id.keys():
+            label2id[tmp] = num
+            id2label[num] = tmp
+            num += 1
+        filename_path = os.path.join(path, name)
+        f = open(filename_path, 'r', encoding='utf-8')
+        for line in f.readlines():
+            if len(line.strip().split(',')) == 2 and line.strip() != '':
+                res = line.strip().split(',')
+                try:
+                    res = list(map(lambda x: int(x), res))
+                except ValueError as e:
+                    continue
+                tmp_data.append(res)
+                label.append(label2id[tmp])
+        tmp_data = np.array(tmp_data, dtype=np.int32)
+        tmp_data = np.array(list(map(lambda a: a / np.max(a), tmp_data)))
+        data = np.concatenate([data, tmp_data], axis=0)
+    data = data[1:]
+    label = np.array(label, dtype=np.int32)
+    with open(label_path, 'a', encoding='utf-8') as f:
+        for index, value in enumerate(label2id.keys()):
+            f.write(value + '\n')
+        f.close()
+    return data, label, label2id, id2label
 
 # 特征获取
 def feature_process(data,
@@ -84,7 +122,8 @@ def feature_process(data,
 def get_iamge(data, label, classes=6, flag=True):
     imageData = []
     imageLabel = []
-    imageheight = 40
+    # imageheight = 40
+    imageheight = 20
                             # data (batch_size,10)   label (batch_size,)
     for i in range(classes):
         index = []
@@ -131,11 +170,14 @@ def save_h5(save_path,data,label,label_to_id,id_to_label):
 
 
 if __name__=='__main__':
-    path = '../data/sEMG_for_Basic_Hand_movements/Database 1'
-    save_path = '../data/sEMG_for_Basic_Hand_movements/feautre_cache.h5'
-    data, label, label_to_id, id_to_label = get_data(path)
-    featureData, featureLabel = feature_process(data,label)
-    imageData, imageLabel = get_iamge(featureData, featureLabel, flag=True)
+    path = '../data/mydataset/1_2'
+    save_path = '../data/mydataset/1_2.h5'
+    label_path = '../data/mydataset/labels.txt'
+
+    # data, label, label_to_id, id_to_label = get_data(path)
+    data, label, label_to_id, id_to_label = getdata_from_txt(path,label_path)
+    featureData, featureLabel = feature_process(data,label,classes=7)
+    imageData, imageLabel = get_iamge(featureData, featureLabel,classes=7, flag=True)
     save_h5(save_path, imageData, imageLabel, label_to_id, id_to_label)
     # imageData, imageLabel = get_iamge(data, label,flag=False)
     # save_h5(save_path,imageData,imageLabel,label_to_id,id_to_label)
